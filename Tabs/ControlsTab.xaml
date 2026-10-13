@@ -11,6 +11,11 @@
         <!-- Now playing -->
         <Border Style="{StaticResource Card}" Padding="10">
             <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
@@ -37,6 +42,11 @@
                         <Button Style="{StaticResource IconButton}" Content="&#xE893;" Click="Next_Click" />
                     </StackPanel>
                 </StackPanel>
+            </Grid>
+
+            <!-- One pill per app playing media; only shown when there's more than one. -->
+            <StackPanel x:Name="SessionPills" Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center"
+                        Margin="0,6,0,-4" Visibility="Collapsed" />
             </Grid>
         </Border>
 
@@ -69,6 +79,42 @@
                     <TextBlock x:Name="BrightnessText" Grid.Column="2" Foreground="{StaticResource Muted}" FontSize="11"
                                VerticalAlignment="Center" TextAlignment="Right" />
                 </Grid>
+
+                <!-- Screen capture. The island itself is excluded from both. -->
+                <Grid Margin="4,10,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="6" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="6" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Button Style="{StaticResource PillButton}" Click="Screenshot_Click" ToolTip="화면 전체 캡처 (Win+PrtScn) · 스크린샷 폴더에 저장">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE722;" FontFamily="{StaticResource IconFont}" FontSize="13" VerticalAlignment="Center" />
+                            <TextBlock Text="전체" Margin="5,0,0,0" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                    <Button Grid.Column="2" Style="{StaticResource PillButton}" Click="RegionScreenshot_Click"
+                            ToolTip="캡처 도구로 원하는 영역 캡처 (Win+Shift+S)">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE7A8;" FontFamily="{StaticResource IconFont}" FontSize="13" VerticalAlignment="Center" />
+                            <TextBlock Text="영역" Margin="5,0,0,0" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                    <Button x:Name="RecordButton" Grid.Column="4" Style="{StaticResource PillButton}" Click="Record_Click"
+                            ToolTip="주 모니터를 소리와 함께 MP4로 녹화">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock x:Name="RecordIcon" Text="&#xE7C8;" FontFamily="{StaticResource IconFont}" FontSize="12"
+                                       Foreground="#E5484D" VerticalAlignment="Center" />
+                            <TextBlock x:Name="RecordText" Text="녹화" Margin="5,0,0,0" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
+                <Button x:Name="CaptureStatus" Style="{StaticResource TextButton}" Margin="0,4,0,-4" Opacity="0"
+                        HorizontalAlignment="Center" Click="CaptureStatus_Click">
+                    <TextBlock x:Name="CaptureStatusText" FontSize="10" TextTrimming="CharacterEllipsis" />
+                </Button>
             </StackPanel>
         </Border>
     </Grid>

@@ -19,6 +19,10 @@
             </ContextMenu>
         </Border.ContextMenu>
 
+        <Grid>
+        <!-- Pulses red on the collapsed bar while a recording is running. -->
+        <Border x:Name="RecordGlow" Background="#E5484D" Opacity="0" IsHitTestVisible="False" />
+
         <!-- Fixed size so nothing reflows while the island grows; the island just reveals it. -->
         <Grid x:Name="ExpandedView" Width="516" Height="180" Margin="0,8,0,0"
               HorizontalAlignment="Center" VerticalAlignment="Top"
@@ -50,6 +54,7 @@
                 <tabs:WallpaperTab x:Name="WallpaperPage" />
                 <tabs:PowerTab x:Name="PowerPage" />
             </Grid>
+        </Grid>
         </Grid>
     </Border>
 </Window>

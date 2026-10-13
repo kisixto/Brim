@@ -4,27 +4,38 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Threading;
 
 namespace Island.Tabs;
 
 public partial class TodayTab : UserControl
 {
     private readonly ObservableCollection<TodoItem> _items = new(Settings.Current.Todos);
+    // Polled faster than once a second so the seconds flip close to the real boundary.
+    private readonly DispatcherTimer _clock = new() { Interval = TimeSpan.FromMilliseconds(200) };
+    private string _shownTime = "";
 
     public TodayTab()
     {
         InitializeComponent();
         TodoList.ItemsSource = _items;
         UpdateCount();
-        IsVisibleChanged += (_, e) => { if ((bool)e.NewValue) UpdateDate(); };
+        _clock.Tick += (_, _) => UpdateClock();
+        IsVisibleChanged += (_, e) =>
+        {
+            if ((bool)e.NewValue) { UpdateClock(); _clock.Start(); }
+            else _clock.Stop();
+        };
     }
 
-    private void UpdateDate()
+    private void UpdateClock()
     {
         var now = DateTime.Now;
-        MonthText.Text = now.ToString("MMMM");
-        DayText.Text = now.Day.ToString();
-        WeekdayText.Text = now.ToString("dddd");
+        var time = now.ToString("HH:mm:ss");
+        if (time == _shownTime) return;
+        _shownTime = time;
+        TimeText.Text = time;
+        DateText.Text = now.ToString("M월 d일 dddd");
     }
 
     private void NewTodo_KeyDown(object sender, KeyEventArgs e)

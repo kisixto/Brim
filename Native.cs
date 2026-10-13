@@ -36,6 +36,55 @@ internal static class Native
         return hz is >= 30 and <= 360 ? hz : 60;
     }
 
+    // ---------- screen capture ----------
+
+    // WDA_EXCLUDEFROMCAPTURE (Windows 10 2004+): the window stays on the monitor but is left out of
+    // every screenshot, recording and screen share.
+    public const uint WDA_NONE = 0x0, WDA_EXCLUDEFROMCAPTURE = 0x11;
+    [DllImport("user32.dll")] public static extern bool SetWindowDisplayAffinity(IntPtr hwnd, uint affinity);
+
+    // Presses a key combination (all down in order, then up in reverse), e.g. Win+Shift+S.
+    public const ushort VK_LWIN = 0x5B, VK_SHIFT = 0x10, VK_SNAPSHOT = 0x2C, VK_S = 0x53;
+
+    [StructLayout(LayoutKind.Explicit, Size = 40)]
+    private struct KeyInput
+    {
+        [FieldOffset(0)] public uint Type;
+        [FieldOffset(8)] public ushort Vk;
+        [FieldOffset(10)] public ushort Scan;
+        [FieldOffset(12)] public uint Flags;
+        [FieldOffset(16)] public uint Time;
+        [FieldOffset(24)] public IntPtr Extra;
+    }
+    [DllImport("user32.dll")] private static extern uint SendInput(uint count, KeyInput[] inputs, int size);
+
+    public static void PressKeys(params ushort[] keys)
+    {
+        const uint KEYBOARD = 1, EXTENDED = 0x1, KEYUP = 0x2;
+        var inputs = new KeyInput[keys.Length * 2];
+        for (int i = 0; i < keys.Length; i++)
+        {
+            uint ext = keys[i] is VK_LWIN or VK_SNAPSHOT ? EXTENDED : 0;
+            inputs[i] = new KeyInput { Type = KEYBOARD, Vk = keys[i], Flags = ext };
+            inputs[inputs.Length - 1 - i] = new KeyInput { Type = KEYBOARD, Vk = keys[i], Flags = ext | KEYUP };
+        }
+        SendInput((uint)inputs.Length, inputs, Marshal.SizeOf<KeyInput>());
+    }
+
+    [DllImport("shell32.dll")] private static extern int SHGetKnownFolderPath(ref Guid id, uint flags, IntPtr token, out IntPtr path);
+
+    // Where Win+PrtScn and Snipping Tool save screenshots (usually Pictures\Screenshots).
+    public static string ScreenshotsFolder()
+    {
+        var id = new Guid("b7bede81-df94-4682-a7d8-57a52620b86f");
+        if (SHGetKnownFolderPath(ref id, 0, IntPtr.Zero, out var ptr) == 0)
+        {
+            try { return Marshal.PtrToStringUni(ptr)!; }
+            finally { Marshal.FreeCoTaskMem(ptr); }
+        }
+        return System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures), "Screenshots");
+    }
+
     // ---------- stats ----------
 
     [DllImport("kernel32.dll")] public static extern bool GetSystemTimes(out long idle, out long kernel, out long user);

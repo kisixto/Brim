@@ -89,6 +89,45 @@ public partial class MainWindow : Window
         Native.SetWindowLong(hwnd, Native.GWL_EXSTYLE, Native.GetWindowLong(hwnd, Native.GWL_EXSTYLE) | Native.WS_EX_TOOLWINDOW);
         Native.AddClipboardFormatListener(hwnd);
         HwndSource.FromHwnd(hwnd)!.AddHook(WndProc);
+        _hwnd = hwnd;
+    }
+
+    // ---------- capture ----------
+
+    private IntPtr _hwnd;
+    private int _hideRequests;
+    private bool _recording;
+
+    // The island shows up in other apps' screenshots and screen sharing like any window, but steps out
+    // of the frame for its own captures. Counted, so a screenshot taken mid-recording doesn't unhide it.
+    public void SetHiddenFromCapture(bool hidden)
+    {
+        _hideRequests = Math.Max(0, _hideRequests + (hidden ? 1 : -1));
+        Native.SetWindowDisplayAffinity(_hwnd, _hideRequests > 0 ? Native.WDA_EXCLUDEFROMCAPTURE : Native.WDA_NONE);
+    }
+
+    // While recording, the collapsed bar glows red so it's obvious even with the island closed.
+    public void SetRecording(bool recording)
+    {
+        _recording = recording;
+        UpdateRecordGlow();
+    }
+
+    private void UpdateRecordGlow()
+    {
+        if (_recording && !_expanded)
+        {
+            RecordGlow.BeginAnimation(OpacityProperty, new DoubleAnimation(1, 0.35, Anim.Ms(900))
+            {
+                AutoReverse = true,
+                RepeatBehavior = RepeatBehavior.Forever,
+                EasingFunction = new SineEase { EasingMode = EasingMode.EaseInOut },
+            });
+        }
+        else
+        {
+            Anim.To(RecordGlow, OpacityProperty, 0, 200);
+        }
     }
 
     private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
@@ -218,6 +257,7 @@ public partial class MainWindow : Window
         _collapseTimer.Stop();
         if (_expanded) return;
         _expanded = true;
+        UpdateRecordGlow();
 
         ExpandedView.Visibility = Visibility.Visible;
         ExpandedView.UpdateLayout();
@@ -240,6 +280,7 @@ public partial class MainWindow : Window
         if (!_expanded) return;
         _expanded = false;
         PowerPage.Disarm();
+        UpdateRecordGlow();
 
         // Content leaves first, then the island tucks back into the edge.
         Anim.To(ExpandedView, OpacityProperty, 0, 130, completed: (_, _) =>
@@ -298,5 +339,7 @@ public partial class MainWindow : Window
             AppsPage.AddFiles(files);
     }
 
-    private void Quit_Click(object sender, RoutedEventArgs e) => Application.Current.Shutdown();
+    // Finish writing an in-progress recording before quitting, so the video isn't left corrupt.
+    private void Quit_Click(object sender, RoutedEventArgs e) =>
+        ControlsPage.StopRecording(then: () => Application.Current.Shutdown());
 }
