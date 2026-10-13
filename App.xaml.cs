@@ -18,7 +18,9 @@ public partial class App : Application
             typeof(Timeline), new FrameworkPropertyMetadata { DefaultValue = Native.GetRefreshRate() });
 
         Loc.Apply(Settings.Current.Language);
-        AutoStart.RefreshPath();
+        // Only an installed or portable copy moves the startup entry to itself; a development build
+        // run from the source folder must not take over "start with Windows".
+        if (Updater.Supported) AutoStart.RefreshPath();
         base.OnStartup(e);
     }
 }
