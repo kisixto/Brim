@@ -13,7 +13,7 @@ using ScreenRecorderLib;
 using Windows.Media.Control;
 using Windows.Storage.Streams;
 
-namespace Notchy.Tabs;
+namespace Brim.Tabs;
 
 public partial class ControlsTab : UserControl
 {
@@ -67,7 +67,7 @@ public partial class ControlsTab : UserControl
     // Both buttons hand off to Windows' own capture: Win+PrtScn for the full screen, and
     // Win+Shift+S for Snipping Tool's selection overlay. The island steps out of the frame
     // for a moment so it doesn't end up in the shot.
-    private async Task WithNotchyHiddenAsync(params ushort[] keys)
+    private async Task WithBrimHiddenAsync(params ushort[] keys)
     {
         Host?.SetHiddenFromCapture(true);
         try
@@ -84,7 +84,7 @@ public partial class ControlsTab : UserControl
     private async void Screenshot_Click(object sender, RoutedEventArgs e)
     {
         var started = DateTime.Now.AddSeconds(-1);
-        await WithNotchyHiddenAsync(Native.VK_LWIN, Native.VK_SNAPSHOT);
+        await WithBrimHiddenAsync(Native.VK_LWIN, Native.VK_SNAPSHOT);
 
         // Windows names the file itself; find it so the status line can open it.
         var saved = await Task.Run(() => NewestScreenshotSince(started));
@@ -94,7 +94,7 @@ public partial class ControlsTab : UserControl
     private async void RegionScreenshot_Click(object sender, RoutedEventArgs e)
     {
         ShowCaptureStatus(Loc.T("CapRegionHint"), null);
-        await WithNotchyHiddenAsync(Native.VK_LWIN, Native.VK_SHIFT, Native.VK_S);
+        await WithBrimHiddenAsync(Native.VK_LWIN, Native.VK_SHIFT, Native.VK_S);
     }
 
     private static string? NewestScreenshotSince(DateTime since)
@@ -121,7 +121,7 @@ public partial class ControlsTab : UserControl
         if (_recorder != null) { StopRecording(); return; }
 
         // Same folder the Xbox Game Bar uses.
-        var path = Path.Combine(CaptureFolder(Environment.SpecialFolder.MyVideos, "Captures"), $"Notchy_{Stamp()}.mp4");
+        var path = Path.Combine(CaptureFolder(Environment.SpecialFolder.MyVideos, "Captures"), $"Brim_{Stamp()}.mp4");
         RecordButton.IsEnabled = false;
         Anim.SwapText(RecordText, Loc.T("RecStarting"));
         Host?.SetHiddenFromCapture(true); // kept out of its own recording; restored in OnRecordingFinished

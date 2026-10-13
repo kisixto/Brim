@@ -1,13 +1,13 @@
 using System;
 using Microsoft.Win32;
 
-namespace Notchy;
+namespace Brim;
 
 // "Start with Windows" via the per-user Run key (no admin rights needed; shows up in Task Manager → Startup apps).
 internal static class AutoStart
 {
     private const string RunKey = @"Software\Microsoft\Windows\CurrentVersion\Run";
-    private const string ValueName = "Notchy";
+    private const string ValueName = "Brim";
 
     private static string Command => $"\"{Environment.ProcessPath}\"";
 
@@ -27,7 +27,7 @@ internal static class AutoStart
         else key.DeleteValue(ValueName, throwOnMissingValue: false);
     }
 
-    // If the user moved the Notchy folder, point the startup entry at the new location.
+    // If the user moved the Brim folder, point the startup entry at the new location.
     public static void RefreshPath()
     {
         using var key = Registry.CurrentUser.OpenSubKey(RunKey, writable: true);

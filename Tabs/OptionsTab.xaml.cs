@@ -6,11 +6,11 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 
-namespace Notchy.Tabs;
+namespace Brim.Tabs;
 
 public partial class OptionsTab : UserControl
 {
-    public const string RepoUrl = "https://github.com/kisixto/Notchy";
+    public const string RepoUrl = "https://github.com/kisixto/Brim";
 
     // Animated stand-in for the scroll position, so the wheel glides instead of jumping.
     private static readonly DependencyProperty ScrollOffsetProperty = DependencyProperty.Register(
@@ -64,7 +64,7 @@ public partial class OptionsTab : UserControl
         void UpdateVersion() => versionText.Text = Loc.T("OptVersion", $"{version?.Major}.{version?.Minor}.{version?.Build}");
         UpdateVersion();
         Loc.Changed += UpdateVersion;
-        Row(about, null, versionText, literal: "Notchy");
+        Row(about, null, versionText, literal: "Brim");
 
         var links = new WrapPanel { Margin = new Thickness(0, 2, 0, 6) };
         links.Children.Add(Link("OptGitHub", () => Open(RepoUrl)));

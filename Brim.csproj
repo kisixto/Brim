@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <Version>1.0.0</Version>
-    <Product>Notchy</Product>
+    <Product>Brim</Product>
     <Description>A notch-style panel at the top of the Windows screen</Description>
     <!-- ScreenRecorderLib is a mixed-mode (C++/CLI) assembly: it needs an explicit x64 platform
          and cannot be bundled into a single-file exe, so publish as a normal folder. -->

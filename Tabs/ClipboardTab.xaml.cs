@@ -7,7 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
 
-namespace Notchy.Tabs;
+namespace Brim.Tabs;
 
 public sealed record ClipItem(string Text, string Preview, string Time);
 

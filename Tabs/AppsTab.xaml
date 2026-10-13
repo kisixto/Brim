@@ -1,4 +1,4 @@
-<UserControl x:Class="Notchy.Tabs.AppsTab"
+<UserControl x:Class="Brim.Tabs.AppsTab"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Grid>

@@ -6,7 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
 
-namespace Notchy.Tabs;
+namespace Brim.Tabs;
 
 public partial class TodayTab : UserControl
 {

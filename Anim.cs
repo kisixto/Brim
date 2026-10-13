@@ -5,7 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 
-namespace Notchy;
+namespace Brim;
 
 // Small helpers so code-driven transitions all share the same feel.
 internal static class Anim

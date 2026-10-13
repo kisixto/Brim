@@ -6,7 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using Microsoft.Win32;
 
-namespace Notchy.Tabs;
+namespace Brim.Tabs;
 
 public partial class AppsTab : UserControl
 {

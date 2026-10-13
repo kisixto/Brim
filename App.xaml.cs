@@ -2,7 +2,7 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Media.Animation;
 
-namespace Notchy;
+namespace Brim;
 
 public partial class App : Application
 {
@@ -10,7 +10,7 @@ public partial class App : Application
 
     protected override void OnStartup(StartupEventArgs e)
     {
-        _single = new Mutex(true, "Notchy.SingleInstance", out bool first);
+        _single = new Mutex(true, "Brim.SingleInstance", out bool first);
         if (!first) { Shutdown(); return; }
 
         // WPF caps animations at 60 fps by default; match the monitor (e.g. 144 Hz) instead.

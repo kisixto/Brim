@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Windows;
 
-namespace Notchy;
+namespace Brim;
 
 // Korean / English strings. Each one is published as an app resource "L.<key>", so XAML using
 // {DynamicResource L.Key} (or code using SetResourceReference) updates live when the language changes.
@@ -12,7 +12,7 @@ internal static class Loc
 {
     private static readonly Dictionary<string, (string Ko, string En)> Strings = new()
     {
-        ["Quit"] = ("Notchy 종료", "Quit Notchy"),
+        ["Quit"] = ("Brim 종료", "Quit Brim"),
         ["PowerAgain"] = ("한 번 더", "Again"),
 
         ["NoMedia"] = ("재생 중인 음악 없음", "Nothing playing"),
@@ -53,10 +53,10 @@ internal static class Loc
         ["ClipClear"] = ("모두 지우기", "Clear all"),
         ["ClipEmpty"] = ("복사한 텍스트가 여기에 쌓여요", "Text you copy shows up here"),
 
-        ["AppsHint"] = ("프로그램, 바로가기, 폴더를 Notchy에 끌어다 놓아도 추가돼요", "Drag programs, shortcuts or folders onto Notchy to add them"),
+        ["AppsHint"] = ("프로그램, 바로가기, 폴더를 Brim에 끌어다 놓아도 추가돼요", "Drag programs, shortcuts or folders onto Brim to add them"),
         ["AppsRemove"] = ("목록에서 빼기", "Remove"),
         ["AppsAdd"] = ("추가", "Add"),
-        ["AppsPickTitle"] = ("Notchy에 추가할 프로그램", "Programs to add to Notchy"),
+        ["AppsPickTitle"] = ("Brim에 추가할 프로그램", "Programs to add to Brim"),
         ["AppsFilter"] = ("프로그램과 바로가기|*.exe;*.lnk;*.url|모든 파일|*.*", "Programs and shortcuts|*.exe;*.lnk;*.url|All files|*.*"),
 
         ["WpShuffle"] = ("무작위", "Shuffle"),
@@ -78,7 +78,7 @@ internal static class Loc
         ["Opt24h"] = ("24시간제", "24-hour clock"),
         ["OptCapture"] = ("캡처", "Capture"),
         ["OptRecordAudio"] = ("녹화에 컴퓨터 소리 포함", "Include system sound in recordings"),
-        ["OptHideOwn"] = ("Notchy로 찍을 때 Notchy 숨기기", "Hide Notchy from its own captures"),
+        ["OptHideOwn"] = ("Brim으로 찍을 때 Brim 숨기기", "Hide Brim from its own captures"),
         ["OptTabs"] = ("보이는 탭", "Visible tabs"),
         ["OptAbout"] = ("정보", "About"),
         ["OptVersion"] = ("버전 {0}", "Version {0}"),

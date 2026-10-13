@@ -9,7 +9,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Microsoft.Win32;
 
-namespace Notchy.Tabs;
+namespace Brim.Tabs;
 
 public partial class WallpaperTab : UserControl
 {

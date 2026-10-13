@@ -5,7 +5,7 @@ using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Notchy;
+namespace Brim;
 
 public sealed class TodoItem : INotifyPropertyChanged
 {
@@ -22,11 +22,11 @@ public sealed class TodoItem : INotifyPropertyChanged
     public event PropertyChangedEventHandler? PropertyChanged;
 }
 
-// Saved to %AppData%\Notchy\settings.json. Clipboard history is never saved.
+// Saved to %AppData%\Brim\settings.json. Clipboard history is never saved.
 public sealed class Settings
 {
     private static readonly string FilePath =
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Notchy", "settings.json");
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Brim", "settings.json");
 
     public List<TodoItem> Todos { get; set; } = new();
     public List<string> Apps { get; set; } = new();

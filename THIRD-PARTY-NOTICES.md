@@ -1,6 +1,6 @@
 # Third-party notices
 
-Notchy includes the following third-party software.
+Brim includes the following third-party software.
 
 ## ScreenRecorderLib 7.0.1
 

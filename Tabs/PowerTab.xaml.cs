@@ -6,7 +6,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
 
-namespace Notchy.Tabs;
+namespace Brim.Tabs;
 
 public partial class PowerTab : UserControl
 {

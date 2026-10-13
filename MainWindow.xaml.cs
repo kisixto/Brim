@@ -9,7 +9,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
 
-namespace Notchy;
+namespace Brim;
 
 public partial class MainWindow : Window
 {
