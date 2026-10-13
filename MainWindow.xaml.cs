@@ -76,7 +76,11 @@ public partial class MainWindow : Window
         Deactivated += (_, _) => { if (!CursorInsideExpandedArea()) Collapse(); };
         Body.SizeChanged += (_, _) => UpdateShape();
 
-        Loaded += (_, _) => PlaceAtTop();
+        Loaded += (_, _) =>
+        {
+            PlaceAtTop();
+            Updater.Start();
+        };
         SystemParameters.StaticPropertyChanged += (_, e) =>
         {
             if (e.PropertyName == nameof(SystemParameters.WorkArea)) PlaceAtTop();
@@ -377,4 +381,7 @@ public partial class MainWindow : Window
 
     // Finish writing an in-progress recording before quitting, so the video isn't left corrupt.
     public void Quit() => ControlsPage.StopRecording(then: () => Application.Current.Shutdown());
+
+    // Same care as Quit: a running recording is finished before Brim closes for the update.
+    public void RestartForUpdate() => ControlsPage.StopRecording(then: Updater.ApplyAndRestart);
 }

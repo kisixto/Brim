@@ -1,0 +1,59 @@
+# Push a version tag (e.g. `git tag -a v1.1.1 -m "notes" && git push origin v1.1.1`) to build Brim,
+# package it with Velopack (installer, portable zip, update packages) and publish a GitHub release.
+# Installed and portable copies of Brim pick the new release up automatically.
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Version and notes from the tag
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}".TrimStart('v')
+          "VERSION=$version" >> $env:GITHUB_ENV
+          git tag -l --format='%(contents)' "${{ github.ref_name }}" | Out-File notes.md -Encoding utf8
+
+      - name: Build
+        run: dotnet publish Brim.csproj -c Release -o publish -p:Version=${{ env.VERSION }}
+
+      - name: Install vpk
+        run: dotnet tool install -g vpk --version 1.2.161
+
+      # Lets vpk build a small delta package from the previous release.
+      - name: Download previous release
+        run: vpk download github --repoUrl https://github.com/${{ github.repository }} --token ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+
+      # Setup installs the .NET 8 Desktop Runtime and VC++ runtime (needed for recording) if missing.
+      - name: Pack
+        run: >
+          vpk pack --packId Brim --packVersion ${{ env.VERSION }} --packDir publish --mainExe Brim.exe
+          --packTitle Brim --packAuthors kisixto --framework net8-x64-desktop,vcredist143-x64
+
+      - name: Publish release
+        run: >
+          vpk upload github --repoUrl https://github.com/${{ github.repository }} --token ${{ secrets.GITHUB_TOKEN }}
+          --publish --releaseName "Brim ${{ env.VERSION }}" --tag ${{ github.ref_name }}
+
+      - name: Release notes
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if ((Get-Content notes.md -Raw).Trim()) { gh release edit "${{ github.ref_name }}" --notes-file notes.md }

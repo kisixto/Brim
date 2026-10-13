@@ -30,12 +30,19 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
+## Velopack 1.2.161
+
+https://github.com/velopack/velopack
+
+Installer, portable packaging and self-updates. Licensed under the MIT License
+(same terms as above), Copyright (c) Velopack Ltd.
+
 ## .NET runtime, WPF and System.Management
 
 https://github.com/dotnet/runtime · https://github.com/dotnet/wpf
 
-The release zip bundles the .NET 8 runtime and WPF. These, and the System.Management
-package, are licensed under the MIT License, Copyright (c) .NET Foundation and Contributors.
+Brim runs on the .NET 8 Desktop Runtime (installed by the setup if missing). The runtime, WPF and
+the System.Management package are licensed under the MIT License, Copyright (c) .NET Foundation and Contributors.
 Their own third-party notices are published at
 https://github.com/dotnet/runtime/blob/main/THIRD-PARTY-NOTICES.TXT and
 https://github.com/dotnet/wpf/blob/main/THIRD-PARTY-NOTICES.TXT.

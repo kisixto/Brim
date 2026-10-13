@@ -41,6 +41,7 @@ public sealed class Settings
     public bool RecordAudio { get; set; } = true;
     public bool HideFromOwnCaptures { get; set; } = true;
     public List<string> HiddenTabs { get; set; } = new();
+    public bool AutoUpdate { get; set; } = true;
 
     [JsonIgnore] public static Settings Current { get; } = Load();
     [JsonIgnore] public static string Folder => Path.GetDirectoryName(FilePath)!;

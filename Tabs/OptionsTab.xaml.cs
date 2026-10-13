@@ -58,6 +58,40 @@ public partial class OptionsTab : UserControl
             }, literal: name);
         }
 
+        var updates = Section("OptUpdates");
+        Toggle(updates, "UpdAuto", () => S.AutoUpdate, on =>
+        {
+            S.AutoUpdate = on;
+            if (on) _ = Updater.CheckAsync();
+        });
+        var updateStatus = new TextBlock
+        {
+            Foreground = (Brush)FindResource("Muted"), FontSize = 11, VerticalAlignment = VerticalAlignment.Center,
+            TextTrimming = TextTrimming.CharacterEllipsis,
+        };
+        var updateAction = new Button { Style = (Style)FindResource("TextButton"), VerticalAlignment = VerticalAlignment.Center };
+        updateAction.Click += async (_, _) =>
+        {
+            if (Updater.ReadyToApply) Host?.RestartForUpdate();
+            else await Updater.CheckAsync();
+        };
+        void ShowUpdateState()
+        {
+            updateStatus.Text = Loc.T(Updater.StatusKey, Updater.StatusArg);
+            updateAction.SetResourceReference(ContentProperty, Updater.ReadyToApply ? "L.UpdRestart" : "L.UpdCheckNow");
+            updateAction.Visibility = Updater.Supported ? Visibility.Visible : Visibility.Collapsed;
+        }
+        ShowUpdateState();
+        Updater.Changed += ShowUpdateState;
+        Loc.Changed += ShowUpdateState;
+        var statusRow = new Grid { MinHeight = 36 };
+        statusRow.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        statusRow.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        Grid.SetColumn(updateAction, 1);
+        statusRow.Children.Add(updateStatus);
+        statusRow.Children.Add(updateAction);
+        updates.Children.Add(statusRow);
+
         var about = Section("OptAbout");
         var version = Assembly.GetExecutingAssembly().GetName().Version;
         var versionText = new TextBlock { Foreground = (Brush)FindResource("Muted"), FontSize = 11, VerticalAlignment = VerticalAlignment.Center };
