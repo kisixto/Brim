@@ -1,0 +1,11 @@
+<UserControl x:Class="Island.Tabs.AppsTab"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid>
+        <ScrollViewer VerticalScrollBarVisibility="Hidden">
+            <WrapPanel x:Name="Tiles" HorizontalAlignment="Center" />
+        </ScrollViewer>
+        <TextBlock x:Name="Hint" Text="프로그램, 바로가기, 폴더를 아일랜드에 끌어다 놓아도 추가돼요"
+                   Foreground="#5A5A5E" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Bottom" />
+    </Grid>
+</UserControl>
