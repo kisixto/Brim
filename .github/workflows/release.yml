@@ -27,6 +27,8 @@ jobs:
         run: |
           $version = "${{ github.ref_name }}".TrimStart('v')
           "VERSION=$version" >> $env:GITHUB_ENV
+          # actions/checkout fetches a pushed tag without its annotation; refetch it to read the message.
+          git fetch --force origin "refs/tags/${{ github.ref_name }}:refs/tags/${{ github.ref_name }}"
           git tag -l --format='%(contents)' "${{ github.ref_name }}" | Out-File notes.md -Encoding utf8
 
       - name: Build
