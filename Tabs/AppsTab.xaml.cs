@@ -6,7 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using Microsoft.Win32;
 
-namespace Island.Tabs;
+namespace Notchy.Tabs;
 
 public partial class AppsTab : UserControl
 {
@@ -14,6 +14,7 @@ public partial class AppsTab : UserControl
     {
         InitializeComponent();
         Rebuild();
+        Loc.Changed += Rebuild;
     }
 
     public void AddFiles(IEnumerable<string> paths)
@@ -46,7 +47,7 @@ public partial class AppsTab : UserControl
             TextAlignment = TextAlignment.Center, TextTrimming = TextTrimming.CharacterEllipsis,
         });
 
-        var remove = new MenuItem { Header = "목록에서 빼기" };
+        var remove = new MenuItem { Header = Loc.T("AppsRemove") };
         remove.Click += (_, _) =>
         {
             Settings.Current.Apps.Remove(path);
@@ -82,7 +83,7 @@ public partial class AppsTab : UserControl
         });
         stack.Children.Add(new TextBlock
         {
-            Text = "추가", FontSize = 10, Margin = new Thickness(0, 5, 0, 0), TextAlignment = TextAlignment.Center,
+            Text = Loc.T("AppsAdd"), FontSize = 10, Margin = new Thickness(0, 5, 0, 0), TextAlignment = TextAlignment.Center,
             Foreground = (Brush)FindResource("Muted"),
         });
 
@@ -91,8 +92,8 @@ public partial class AppsTab : UserControl
         {
             var dialog = new OpenFileDialog
             {
-                Title = "아일랜드에 추가할 프로그램",
-                Filter = "프로그램과 바로가기|*.exe;*.lnk;*.url|모든 파일|*.*",
+                Title = Loc.T("AppsPickTitle"),
+                Filter = Loc.T("AppsFilter"),
                 Multiselect = true,
             };
             if (dialog.ShowDialog(Window.GetWindow(this)) == true)

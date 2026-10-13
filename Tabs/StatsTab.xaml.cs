@@ -5,7 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Threading;
 
-namespace Island.Tabs;
+namespace Notchy.Tabs;
 
 public partial class StatsTab : UserControl
 {
@@ -17,9 +17,9 @@ public partial class StatsTab : UserControl
     {
         InitializeComponent();
         _cpu = AddTile("CPU");
-        _ram = AddTile("메모리");
-        _disk = AddTile("디스크");
-        _power = AddTile("배터리");
+        _ram = AddTile("Memory");
+        _disk = AddTile("Disk");
+        _power = AddTile("Battery");
 
         _timer.Tick += (_, _) => Refresh();
         IsVisibleChanged += (_, e) =>
@@ -29,9 +29,10 @@ public partial class StatsTab : UserControl
         };
     }
 
-    private Tile AddTile(string label)
+    private Tile AddTile(string labelKey)
     {
-        var tile = new Tile(label, (Style)FindResource("Card"));
+        var tile = new Tile(Loc.T(labelKey), (Style)FindResource("Card"));
+        if (labelKey != "CPU") tile.Label.SetResourceReference(TextBlock.TextProperty, "L." + labelKey);
         Tiles.Children.Add(tile.Root);
         return tile;
     }
@@ -49,7 +50,7 @@ public partial class StatsTab : UserControl
     private void Refresh()
     {
         double cpu = SampleCpu();
-        _cpu.Set(cpu, $"{cpu * 100:0}%", $"{Environment.ProcessorCount}스레드");
+        _cpu.Set(cpu, $"{cpu * 100:0}%", Loc.T("Threads", Environment.ProcessorCount));
 
         var mem = new Native.MemoryStatus { Length = (uint)System.Runtime.InteropServices.Marshal.SizeOf<Native.MemoryStatus>() };
         Native.GlobalMemoryStatusEx(ref mem);
@@ -60,23 +61,23 @@ public partial class StatsTab : UserControl
         {
             var drive = new DriveInfo(Path.GetPathRoot(Environment.SystemDirectory)!);
             double used = 1 - (double)drive.AvailableFreeSpace / drive.TotalSize;
-            _disk.Set(used, $"{used * 100:0}%", $"{drive.Name.TrimEnd('\\')} 여유 {drive.AvailableFreeSpace / 1073741824.0:0} GB");
+            _disk.Set(used, $"{used * 100:0}%", Loc.T("DiskFree", drive.Name.TrimEnd('\\'), drive.AvailableFreeSpace / 1073741824.0));
         }
         catch { }
 
         Native.GetSystemPowerStatus(out var power);
         if ((power.BatteryFlag & 128) == 0 && power.BatteryLifePercent <= 100)
         {
-            _power.Label.Text = "배터리";
+            _power.Label.SetResourceReference(TextBlock.TextProperty, "L.Battery");
             _power.Set(power.BatteryLifePercent / 100.0, $"{power.BatteryLifePercent}%",
-                       power.ACLineStatus == 1 ? "충전 중" : "배터리 사용 중", invert: true);
+                       Loc.T(power.ACLineStatus == 1 ? "Charging" : "OnBattery"), invert: true);
         }
         else
         {
             var up = TimeSpan.FromMilliseconds(Environment.TickCount64);
-            _power.Label.Text = "가동 시간";
-            _power.Set(null, up.TotalDays >= 1 ? $"{(int)up.TotalDays}일" : $"{up.Hours}시간",
-                       up.TotalDays >= 1 ? $"{up.Hours}시간 {up.Minutes}분" : $"{up.Minutes}분");
+            _power.Label.SetResourceReference(TextBlock.TextProperty, "L.Uptime");
+            _power.Set(null, up.TotalDays >= 1 ? Loc.T("Days", (int)up.TotalDays) : Loc.T("Hours", up.Hours),
+                       up.TotalDays >= 1 ? Loc.T("HoursMinutes", up.Hours, up.Minutes) : Loc.T("Minutes", up.Minutes));
         }
     }
 

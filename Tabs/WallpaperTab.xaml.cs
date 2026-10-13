@@ -9,7 +9,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Microsoft.Win32;
 
-namespace Island.Tabs;
+namespace Notchy.Tabs;
 
 public partial class WallpaperTab : UserControl
 {
@@ -119,7 +119,7 @@ public partial class WallpaperTab : UserControl
 
     private void Folder_Click(object sender, RoutedEventArgs e)
     {
-        var dialog = new OpenFolderDialog { Title = "배경화면 사진이 있는 폴더", InitialDirectory = FolderText.Text };
+        var dialog = new OpenFolderDialog { Title = Loc.T("WpPickTitle"), InitialDirectory = FolderText.Text };
         if (dialog.ShowDialog(Window.GetWindow(this)) != true) return;
         Settings.Current.WallpaperFolder = dialog.FolderName;
         Settings.Current.Save();

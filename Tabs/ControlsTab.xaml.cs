@@ -13,7 +13,7 @@ using ScreenRecorderLib;
 using Windows.Media.Control;
 using Windows.Storage.Streams;
 
-namespace Island.Tabs;
+namespace Notchy.Tabs;
 
 public partial class ControlsTab : UserControl
 {
@@ -35,6 +35,11 @@ public partial class ControlsTab : UserControl
         };
         Loaded += async (_, _) => await InitMediaAsync();
         IsVisibleChanged += (_, e) => { if ((bool)e.NewValue) RefreshLevels(); };
+        Loc.Changed += () =>
+        {
+            if (_recorder == null) RecordText.Text = Loc.T("Record");
+            if (_session == null) SongTitle.Text = Loc.T("NoMedia");
+        };
     }
 
     // ---------- screen capture ----------
@@ -57,14 +62,14 @@ public partial class ControlsTab : UserControl
 
     private static string Stamp() => DateTime.Now.ToString("yyyyMMdd_HHmmss");
 
-    private MainWindow? Island => Window.GetWindow(this) as MainWindow;
+    private MainWindow? Host => Window.GetWindow(this) as MainWindow;
 
     // Both buttons hand off to Windows' own capture: Win+PrtScn for the full screen, and
     // Win+Shift+S for Snipping Tool's selection overlay. The island steps out of the frame
     // for a moment so it doesn't end up in the shot.
-    private async Task WithIslandHiddenAsync(params ushort[] keys)
+    private async Task WithNotchyHiddenAsync(params ushort[] keys)
     {
-        Island?.SetHiddenFromCapture(true);
+        Host?.SetHiddenFromCapture(true);
         try
         {
             Native.PressKeys(keys);
@@ -72,24 +77,24 @@ public partial class ControlsTab : UserControl
         }
         finally
         {
-            Island?.SetHiddenFromCapture(false);
+            Host?.SetHiddenFromCapture(false);
         }
     }
 
     private async void Screenshot_Click(object sender, RoutedEventArgs e)
     {
         var started = DateTime.Now.AddSeconds(-1);
-        await WithIslandHiddenAsync(Native.VK_LWIN, Native.VK_SNAPSHOT);
+        await WithNotchyHiddenAsync(Native.VK_LWIN, Native.VK_SNAPSHOT);
 
         // Windows names the file itself; find it so the status line can open it.
         var saved = await Task.Run(() => NewestScreenshotSince(started));
-        ShowCaptureStatus(saved != null ? "화면 전체 저장됨 · 클릭해서 보기" : "화면 전체를 캡처했어요", saved);
+        ShowCaptureStatus(Loc.T(saved != null ? "CapFullSaved" : "CapFullDone"), saved);
     }
 
     private async void RegionScreenshot_Click(object sender, RoutedEventArgs e)
     {
-        ShowCaptureStatus("캡처 도구에서 영역을 고르면 클립보드에 복사돼요", null);
-        await WithIslandHiddenAsync(Native.VK_LWIN, Native.VK_SHIFT, Native.VK_S);
+        ShowCaptureStatus(Loc.T("CapRegionHint"), null);
+        await WithNotchyHiddenAsync(Native.VK_LWIN, Native.VK_SHIFT, Native.VK_S);
     }
 
     private static string? NewestScreenshotSince(DateTime since)
@@ -116,16 +121,16 @@ public partial class ControlsTab : UserControl
         if (_recorder != null) { StopRecording(); return; }
 
         // Same folder the Xbox Game Bar uses.
-        var path = Path.Combine(CaptureFolder(Environment.SpecialFolder.MyVideos, "Captures"), $"Island_{Stamp()}.mp4");
+        var path = Path.Combine(CaptureFolder(Environment.SpecialFolder.MyVideos, "Captures"), $"Notchy_{Stamp()}.mp4");
         RecordButton.IsEnabled = false;
-        Anim.SwapText(RecordText, "준비 중…");
-        Island?.SetHiddenFromCapture(true); // kept out of its own recording; restored in OnRecordingFinished
+        Anim.SwapText(RecordText, Loc.T("RecStarting"));
+        Host?.SetHiddenFromCapture(true); // kept out of its own recording; restored in OnRecordingFinished
 
         try
         {
-            // Main monitor plus whatever is playing through the speakers (no microphone).
+            // Main monitor plus (unless turned off in Options) whatever plays through the speakers. No microphone.
             var options = RecorderOptions.DefaultMainMonitor;
-            if (LoopbackAudioSource.Default is { } speakers)
+            if (Settings.Current.RecordAudio && LoopbackAudioSource.Default is { } speakers)
             {
                 options.AudioOptions = new AudioOptions
                 {
@@ -156,7 +161,7 @@ public partial class ControlsTab : UserControl
         if (_recorder == null) { then?.Invoke(); return; }
         _afterRecording = then;
         RecordButton.IsEnabled = false;
-        Anim.SwapText(RecordText, "저장 중…");
+        Anim.SwapText(RecordText, Loc.T("RecSaving"));
         _recorder.Stop();
     }
 
@@ -172,7 +177,7 @@ public partial class ControlsTab : UserControl
         Anim.Brush(RecordIcon, TextBlock.ForegroundProperty, Colors.White, 260);
         RecordIcon.Text = ""; // stop
         Anim.SwapText(RecordText, "0:00");
-        Island?.SetRecording(true);
+        Host?.SetRecording(true);
     }
 
     private void OnRecordingFinished(string? path, string? error)
@@ -186,12 +191,12 @@ public partial class ControlsTab : UserControl
         Anim.Brush(RecordButton, BackgroundProperty, RecordIdle, 300);
         Anim.Brush(RecordIcon, TextBlock.ForegroundProperty, Color.FromRgb(0xE5, 0x48, 0x4D), 300);
         RecordIcon.Text = ""; // record dot
-        Anim.SwapText(RecordText, "녹화");
-        Island?.SetRecording(false);
-        Island?.SetHiddenFromCapture(false);
+        Anim.SwapText(RecordText, Loc.T("Record"));
+        Host?.SetRecording(false);
+        Host?.SetHiddenFromCapture(false);
 
-        if (error != null) ShowCaptureStatus($"녹화 실패: {error}", null);
-        else if (path != null) ShowCaptureStatus("녹화 저장됨 · 클릭해서 보기", path);
+        if (error != null) ShowCaptureStatus(Loc.T("RecFailed", error), null);
+        else if (path != null) ShowCaptureStatus(Loc.T("RecSaved"), path);
 
         var then = _afterRecording;
         _afterRecording = null;
@@ -343,7 +348,7 @@ public partial class ControlsTab : UserControl
             "firefox" => "Firefox",
             "whale" => "Whale",
             "app" when id.Contains("Spotify", StringComparison.OrdinalIgnoreCase) => "Spotify",
-            _ => name.Length > 0 ? char.ToUpper(name[0]) + name[1..] : "미디어",
+            _ => name.Length > 0 ? char.ToUpper(name[0]) + name[1..] : Loc.T("Media"),
         };
     }
 
@@ -358,7 +363,7 @@ public partial class ControlsTab : UserControl
         var session = _session;
         if (session == null)
         {
-            SongTitle.Text = "재생 중인 음악 없음";
+            SongTitle.Text = Loc.T("NoMedia");
             SongArtist.Text = "";
             Art.ImageSource = null;
             UpdatePlayState();
@@ -368,7 +373,7 @@ public partial class ControlsTab : UserControl
         {
             var props = await session.TryGetMediaPropertiesAsync().AsTask();
             if (session != _session) return;
-            var title = string.IsNullOrEmpty(props.Title) ? "알 수 없는 제목" : props.Title;
+            var title = string.IsNullOrEmpty(props.Title) ? Loc.T("UnknownTitle") : props.Title;
             bool changed = title != SongTitle.Text;
             Anim.SwapText(SongTitle, title);
             Anim.SwapText(SongArtist, props.Artist ?? "");

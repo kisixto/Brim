@@ -6,7 +6,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
 
-namespace Island.Tabs;
+namespace Notchy.Tabs;
 
 public partial class PowerTab : UserControl
 {
@@ -50,7 +50,7 @@ public partial class PowerTab : UserControl
         _armed = d;
 
         Anim.Brush(d.Button, BackgroundProperty, Armed, 260);
-        Anim.SwapText(d.Label, "한 번 더");
+        Anim.SwapText(d.Label, Loc.T("PowerAgain"));
 
         // A little shake of the icon to say "are you sure?".
         var rotate = (RotateTransform)d.Icon.RenderTransform;

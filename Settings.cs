@@ -5,7 +5,7 @@ using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Island;
+namespace Notchy;
 
 public sealed class TodoItem : INotifyPropertyChanged
 {
@@ -22,18 +22,28 @@ public sealed class TodoItem : INotifyPropertyChanged
     public event PropertyChangedEventHandler? PropertyChanged;
 }
 
-// Saved to %AppData%\Island\settings.json. Clipboard history is never saved.
+// Saved to %AppData%\Notchy\settings.json. Clipboard history is never saved.
 public sealed class Settings
 {
     private static readonly string FilePath =
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Island", "settings.json");
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Notchy", "settings.json");
 
     public List<TodoItem> Todos { get; set; } = new();
     public List<string> Apps { get; set; } = new();
     public string? WallpaperFolder { get; set; }
     public string? LastTab { get; set; }
 
+    // Options tab
+    public string Language { get; set; } = "auto";       // auto | ko | en
+    public string OpenSpeed { get; set; } = "normal";    // fast | normal | slow
+    public bool ReduceMotion { get; set; }
+    public bool Clock24h { get; set; } = true;
+    public bool RecordAudio { get; set; } = true;
+    public bool HideFromOwnCaptures { get; set; } = true;
+    public List<string> HiddenTabs { get; set; } = new();
+
     [JsonIgnore] public static Settings Current { get; } = Load();
+    [JsonIgnore] public static string Folder => Path.GetDirectoryName(FilePath)!;
 
     private static Settings Load()
     {

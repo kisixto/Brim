@@ -6,7 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
 
-namespace Island.Tabs;
+namespace Notchy.Tabs;
 
 public partial class TodayTab : UserControl
 {
@@ -31,11 +31,13 @@ public partial class TodayTab : UserControl
     private void UpdateClock()
     {
         var now = DateTime.Now;
-        var time = now.ToString("HH:mm:ss");
+        var culture = Loc.Culture;
+        var time = now.ToString(Settings.Current.Clock24h ? "HH:mm:ss" : Loc.IsKorean ? "tt h:mm:ss" : "h:mm:ss tt", culture);
         if (time == _shownTime) return;
         _shownTime = time;
         TimeText.Text = time;
-        DateText.Text = now.ToString("M월 d일 dddd");
+        TimeText.FontSize = Settings.Current.Clock24h ? 34 : 26; // 12-hour adds 오전/AM
+        DateText.Text = now.ToString(Loc.IsKorean ? "M월 d일 dddd" : "dddd, MMMM d", culture);
     }
 
     private void NewTodo_KeyDown(object sender, KeyEventArgs e)

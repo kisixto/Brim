@@ -5,7 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 
-namespace Island;
+namespace Notchy;
 
 // Small helpers so code-driven transitions all share the same feel.
 internal static class Anim
@@ -28,6 +28,13 @@ internal static class Anim
     public static void To(IAnimatable target, DependencyProperty property, double to, double ms,
                           IEasingFunction? ease = null, double delayMs = 0, EventHandler? completed = null)
     {
+        // "Reduce motion" (Options): short, no delays, no overshoot.
+        if (Settings.Current.ReduceMotion)
+        {
+            ms = Math.Min(ms, 120);
+            delayMs = 0;
+            if (ease is BackEase) ease = Out;
+        }
         var animation = new DoubleAnimation(to, Ms(ms))
         {
             EasingFunction = ease ?? Out,

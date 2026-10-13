@@ -5,6 +5,9 @@
     <UseWPF>true</UseWPF>
     <Nullable>enable</Nullable>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <Version>1.0.0</Version>
+    <Product>Notchy</Product>
+    <Description>A notch-style panel at the top of the Windows screen</Description>
     <!-- ScreenRecorderLib is a mixed-mode (C++/CLI) assembly: it needs an explicit x64 platform
          and cannot be bundled into a single-file exe, so publish as a normal folder. -->
     <Platforms>x64</Platforms>
@@ -13,7 +16,15 @@
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <SelfContained>false</SelfContained>
     <PublishReadyToRun>true</PublishReadyToRun>
+    <!-- Keep the release small: only Korean framework messages (English is built in), no debug symbols. -->
+    <SatelliteResourceLanguages>ko</SatelliteResourceLanguages>
+    <DebugType>none</DebugType>
+    <AllowedReferenceRelatedFileExtensions>.none</AllowedReferenceRelatedFileExtensions>
   </PropertyGroup>
+  <ItemGroup>
+    <!-- Precompiling the 25 MB Windows API projection doubles its size for little startup gain. -->
+    <PublishReadyToRunExclude Include="Microsoft.Windows.SDK.NET.dll" />
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="ScreenRecorderLib" Version="7.0.1" />
     <PackageReference Include="System.Management" Version="8.0.0" />

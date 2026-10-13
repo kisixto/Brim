@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -8,7 +9,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
 
-namespace Island;
+namespace Notchy;
 
 public partial class MainWindow : Window
 {
@@ -44,7 +45,7 @@ public partial class MainWindow : Window
         _tabs = new (string, FrameworkElement)[]
         {
             ("Controls", ControlsPage), ("Today", TodayPage), ("Stats", StatsPage), ("Clipboard", ClipboardPage),
-            ("Apps", AppsPage), ("Wallpaper", WallpaperPage), ("Power", PowerPage),
+            ("Apps", AppsPage), ("Wallpaper", WallpaperPage), ("Power", PowerPage), ("Options", OptionsPage),
         };
         foreach (var (name, page) in _tabs)
         {
@@ -63,8 +64,9 @@ public partial class MainWindow : Window
         }
         int last = Array.FindIndex(_tabs, t => t.Name == Settings.Current.LastTab);
         Select(last < 0 ? 0 : last);
+        ApplyTabVisibility();
+        ApplyOpenSpeed();
 
-        // A short delay so brushing past the top edge doesn't pop the island open.
         _expandTimer.Tick += (_, _) => { _expandTimer.Stop(); Expand(); };
         _collapseTimer.Tick += (_, _) =>
         {
@@ -100,10 +102,12 @@ public partial class MainWindow : Window
 
     // The island shows up in other apps' screenshots and screen sharing like any window, but steps out
     // of the frame for its own captures. Counted, so a screenshot taken mid-recording doesn't unhide it.
+    // Requests are counted even when "hide from own captures" is off, so toggling it mid-recording stays balanced.
     public void SetHiddenFromCapture(bool hidden)
     {
         _hideRequests = Math.Max(0, _hideRequests + (hidden ? 1 : -1));
-        Native.SetWindowDisplayAffinity(_hwnd, _hideRequests > 0 ? Native.WDA_EXCLUDEFROMCAPTURE : Native.WDA_NONE);
+        bool exclude = _hideRequests > 0 && Settings.Current.HideFromOwnCaptures;
+        Native.SetWindowDisplayAffinity(_hwnd, exclude ? Native.WDA_EXCLUDEFROMCAPTURE : Native.WDA_NONE);
     }
 
     // While recording, the collapsed bar glows red so it's obvious even with the island closed.
@@ -204,12 +208,42 @@ public partial class MainWindow : Window
         }
     }
 
+    private bool IsTabShown(int i) => _tabButtons[i].Visibility == Visibility.Visible;
+
     private void TabBar_MouseWheel(object sender, MouseWheelEventArgs e)
     {
-        int step = e.Delta < 0 ? 1 : -1;
-        Select((_current + step + _tabs.Length) % _tabs.Length);
+        int step = e.Delta < 0 ? 1 : -1, next = _current;
+        do next = (next + step + _tabs.Length) % _tabs.Length; while (!IsTabShown(next));
+        Select(next);
         e.Handled = true;
     }
+
+    // Tabs switched off in Options. Options itself can't be hidden, so there is always a way back.
+    public void ApplyTabVisibility()
+    {
+        for (int i = 0; i < _tabs.Length; i++)
+        {
+            bool hidden = _tabs[i].Page != OptionsPage && Settings.Current.HiddenTabs.Contains(_tabs[i].Name);
+            _tabButtons[i].Visibility = hidden ? Visibility.Collapsed : Visibility.Visible;
+        }
+        if (!IsTabShown(_current)) Select(Array.FindIndex(_tabButtons.ToArray(), b => b.Visibility == Visibility.Visible));
+        if (_expanded)
+        {
+            TabBar.UpdateLayout();
+            MoveIndicator(false);
+        }
+    }
+
+    public IEnumerable<string> HideableTabs => _tabs.Where(t => t.Page != OptionsPage).Select(t => t.Name);
+
+    // How long the cursor rests on the bar before it opens; a short delay keeps brushing past it from popping it open.
+    public void ApplyOpenSpeed() =>
+        _expandTimer.Interval = TimeSpan.FromMilliseconds(Settings.Current.OpenSpeed switch
+        {
+            "fast" => 1,
+            "slow" => 350,
+            _ => 120,
+        });
 
     // ---------- expand / collapse ----------
 
@@ -339,7 +373,8 @@ public partial class MainWindow : Window
             AppsPage.AddFiles(files);
     }
 
+    private void Quit_Click(object sender, RoutedEventArgs e) => Quit();
+
     // Finish writing an in-progress recording before quitting, so the video isn't left corrupt.
-    private void Quit_Click(object sender, RoutedEventArgs e) =>
-        ControlsPage.StopRecording(then: () => Application.Current.Shutdown());
+    public void Quit() => ControlsPage.StopRecording(then: () => Application.Current.Shutdown());
 }

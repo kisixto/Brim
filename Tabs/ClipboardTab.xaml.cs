@@ -7,7 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
 
-namespace Island.Tabs;
+namespace Notchy.Tabs;
 
 public sealed record ClipItem(string Text, string Preview, string Time);
 
@@ -22,7 +22,7 @@ public partial class ClipboardTab : UserControl
     {
         InitializeComponent();
         List.ItemsSource = _items;
-        _statusTimer.Tick += (_, _) => { _statusTimer.Stop(); Status.Text = "클릭하면 다시 복사돼요"; };
+        _statusTimer.Tick += (_, _) => { _statusTimer.Stop(); Status.SetResourceReference(TextBlock.TextProperty, "L.ClipHint"); };
     }
 
     public void Capture()
@@ -55,7 +55,7 @@ public partial class ClipboardTab : UserControl
     {
         if (((FrameworkElement)sender).DataContext is not ClipItem item) return;
         try { Clipboard.SetText(item.Text); } catch (COMException) { return; }
-        Status.Text = "복사됨 ✓";
+        Status.Text = Loc.T("ClipCopied");
         _statusTimer.Stop();
         _statusTimer.Start();
     }
