@@ -21,17 +21,38 @@ public sealed record ClipItem(string Key, string Preview, string Time, string? T
 // In-memory only: history is gone when Brim quits.
 public partial class ClipboardTab : UserControl
 {
-    private const int MaxItems = 30;
+    private const int MaxTexts = 30;
     private const int MaxImages = 10; // images can be several MB each, so keep fewer of them
-    private readonly ObservableCollection<ClipItem> _items = new();
+    private readonly ObservableCollection<ClipItem> _texts = new();
+    private readonly ObservableCollection<ClipItem> _images = new();
     private readonly DispatcherTimer _statusTimer = new() { Interval = TimeSpan.FromSeconds(1.2) };
     private DateTime _ownWriteAt; // when Brim itself last put something on the clipboard
+
+    private bool ShowingImages => ShowImages.IsChecked == true;
 
     public ClipboardTab()
     {
         InitializeComponent();
-        List.ItemsSource = _items;
+        TextList.ItemsSource = _texts;
+        ImageList.ItemsSource = _images;
         _statusTimer.Tick += (_, _) => { _statusTimer.Stop(); Status.SetResourceReference(TextBlock.TextProperty, "L.ClipHint"); };
+        Loc.Changed += UpdateView;
+        UpdateView();
+    }
+
+    // Text and images are kept apart; the switch at the top picks which one is shown.
+    private void View_Checked(object sender, RoutedEventArgs e) => UpdateView();
+
+    private void UpdateView()
+    {
+        if (TextView == null || ImageView == null) return; // still loading
+        ShowTexts.Content = Loc.T("ClipTexts", _texts.Count);
+        ShowImages.Content = Loc.T("ClipImages", _images.Count);
+        TextView.Visibility = ShowingImages ? Visibility.Collapsed : Visibility.Visible;
+        ImageView.Visibility = ShowingImages ? Visibility.Visible : Visibility.Collapsed;
+        bool empty = ShowingImages ? _images.Count == 0 : _texts.Count == 0;
+        Empty.Text = Loc.T(ShowingImages ? "ClipEmptyImages" : "ClipEmptyTexts");
+        Empty.Visibility = empty ? Visibility.Visible : Visibility.Collapsed;
     }
 
     public async void Capture()
@@ -89,7 +110,7 @@ public partial class ClipboardTab : UserControl
             encoder.Save(stream);
             var png = stream.ToArray();
 
-            double scale = Math.Min(1.0, 96.0 / frozen.PixelHeight); // 2x of the 48px row height for sharpness
+            double scale = Math.Min(1.0, 160.0 / frozen.PixelHeight); // ~2x the 72px tile height for sharpness
             var thumb = new TransformedBitmap(frozen, new ScaleTransform(scale, scale));
             thumb.Freeze();
 
@@ -100,16 +121,17 @@ public partial class ClipboardTab : UserControl
         catch { return null; }
     }
 
+    private ObservableCollection<ClipItem> ListFor(ClipItem item) => item.Png != null ? _images : _texts;
+
     private void Add(ClipItem item)
     {
-        var existing = _items.FirstOrDefault(i => i.Key == item.Key);
-        if (existing != null) _items.Remove(existing);
-        _items.Insert(0, item);
-
-        foreach (var oldImage in _items.Where(i => i.Png != null).Skip(MaxImages).ToList())
-            _items.Remove(oldImage);
-        while (_items.Count > MaxItems) _items.RemoveAt(_items.Count - 1);
-        Empty.Visibility = Visibility.Collapsed;
+        var list = ListFor(item);
+        var existing = list.FirstOrDefault(i => i.Key == item.Key);
+        if (existing != null) list.Remove(existing);
+        list.Insert(0, item);
+        int max = item.Png != null ? MaxImages : MaxTexts;
+        while (list.Count > max) list.RemoveAt(list.Count - 1);
+        UpdateView();
     }
 
     private void Item_Click(object sender, RoutedEventArgs e)
@@ -135,17 +157,19 @@ public partial class ClipboardTab : UserControl
         catch (COMException) { return; }
 
         // Most recently copied goes to the top, just like copying it fresh.
-        _items.Remove(item);
-        _items.Insert(0, item with { Time = Now() });
+        var list = ListFor(item);
+        list.Remove(item);
+        list.Insert(0, item with { Time = Now() });
 
         Status.Text = Loc.T("ClipCopied");
         _statusTimer.Stop();
         _statusTimer.Start();
     }
 
+    // Clears only the view that's showing (text or images).
     private void Clear_Click(object sender, RoutedEventArgs e)
     {
-        _items.Clear();
-        Empty.Visibility = Visibility.Visible;
+        (ShowingImages ? _images : _texts).Clear();
+        UpdateView();
     }
 }

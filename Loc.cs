@@ -67,7 +67,10 @@ internal static class Loc
         ["ClipHint"] = ("클릭하면 다시 복사돼요", "Click an item to copy it again"),
         ["ClipCopied"] = ("복사됨 ✓", "Copied ✓"),
         ["ClipClear"] = ("모두 지우기", "Clear all"),
-        ["ClipEmpty"] = ("복사한 텍스트와 사진이 여기에 쌓여요", "Text and images you copy show up here"),
+        ["ClipTexts"] = ("텍스트 {0}", "Text {0}"),
+        ["ClipImages"] = ("사진 {0}", "Images {0}"),
+        ["ClipEmptyTexts"] = ("복사한 텍스트가 여기에 쌓여요", "Text you copy shows up here"),
+        ["ClipEmptyImages"] = ("복사한 사진이 여기에 쌓여요 (최근 10장)", "Images you copy show up here (last 10)"),
         ["ClipImage"] = ("이미지 · {0}×{1}", "Image · {0}×{1}"),
 
         ["AppsAll"] = ("전체", "All"),
