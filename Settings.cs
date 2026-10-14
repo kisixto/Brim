@@ -41,6 +41,7 @@ public sealed class Settings
     public bool RecordAudio { get; set; } = true;
     public bool HideFromOwnCaptures { get; set; } = true;
     public List<string> HiddenTabs { get; set; } = new();
+    public List<string> OptInTabs { get; set; } = new();  // off-by-default tabs the user turned on (e.g. Windows)
     public bool AutoUpdate { get; set; } = true;
 
     // Apps tab groups: group names in display order, and which group each app (by path) belongs to.

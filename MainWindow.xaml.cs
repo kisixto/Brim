@@ -253,12 +253,28 @@ public partial class MainWindow : Window
         e.Handled = true;
     }
 
+    // Tabs that stay hidden until turned on in Options. Most tabs are on unless switched off (HiddenTabs);
+    // these are tracked the other way round (OptInTabs) so they also start hidden for existing users.
+    private static readonly HashSet<string> OffByDefault = new() { "Windows" };
+
+    public bool IsTabEnabled(string name) =>
+        OffByDefault.Contains(name) ? Settings.Current.OptInTabs.Contains(name) : !Settings.Current.HiddenTabs.Contains(name);
+
+    public void SetTabEnabled(string name, bool enabled)
+    {
+        var list = OffByDefault.Contains(name) ? Settings.Current.OptInTabs : Settings.Current.HiddenTabs;
+        list.Remove(name);
+        if (enabled == OffByDefault.Contains(name)) list.Add(name);
+        Settings.Current.Save();
+        ApplyTabVisibility();
+    }
+
     // Tabs switched off in Options. Options itself can't be hidden, so there is always a way back.
     public void ApplyTabVisibility()
     {
         for (int i = 0; i < _tabs.Length; i++)
         {
-            bool hidden = _tabs[i].Page != OptionsPage && Settings.Current.HiddenTabs.Contains(_tabs[i].Name);
+            bool hidden = _tabs[i].Page != OptionsPage && !IsTabEnabled(_tabs[i].Name);
             _tabButtons[i].Visibility = hidden ? Visibility.Collapsed : Visibility.Visible;
         }
         if (!IsTabShown(_current)) Select(Array.FindIndex(_tabButtons.ToArray(), b => b.Visibility == Visibility.Visible));

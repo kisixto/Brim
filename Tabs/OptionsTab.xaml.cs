@@ -50,12 +50,7 @@ public partial class OptionsTab : UserControl
         var tabs = Section("OptTabs");
         foreach (var name in Host?.HideableTabs ?? Array.Empty<string>())
         {
-            Toggle(tabs, null, () => !S.HiddenTabs.Contains(name), shown =>
-            {
-                S.HiddenTabs.Remove(name);
-                if (!shown) S.HiddenTabs.Add(name);
-                Host?.ApplyTabVisibility();
-            }, literal: name);
+            Toggle(tabs, null, () => Host?.IsTabEnabled(name) ?? true, shown => Host?.SetTabEnabled(name, shown), literal: name);
         }
 
         var updates = Section("OptUpdates");
@@ -141,11 +136,14 @@ public partial class OptionsTab : UserControl
     private void Toggle(Panel section, string? labelKey, Func<bool> get, Action<bool> set, string? literal = null)
     {
         var toggle = new CheckBox { Style = (Style)FindResource("Switch"), IsChecked = get(), VerticalAlignment = VerticalAlignment.Center };
-        toggle.Click += (_, _) =>
+        // Checked/Unchecked rather than Click, so keyboard and accessibility tools (which toggle without clicking) work too.
+        void Changed(bool on)
         {
-            set(toggle.IsChecked == true);
+            set(on);
             Settings.Current.Save();
-        };
+        }
+        toggle.Checked += (_, _) => Changed(true);
+        toggle.Unchecked += (_, _) => Changed(false);
         Row(section, labelKey, toggle, literal);
     }
 
