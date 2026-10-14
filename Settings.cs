@@ -43,6 +43,10 @@ public sealed class Settings
     public List<string> HiddenTabs { get; set; } = new();
     public bool AutoUpdate { get; set; } = true;
 
+    // Power tab timer (null when nothing is scheduled)
+    public string? ScheduledPower { get; set; }          // shutdown | restart | sleep
+    public DateTime? ScheduledAt { get; set; }
+
     [JsonIgnore] public static Settings Current { get; } = Load();
     [JsonIgnore] public static string Folder => Path.GetDirectoryName(FilePath)!;
 

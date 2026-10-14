@@ -121,10 +121,21 @@ public partial class MainWindow : Window
         UpdateRecordGlow();
     }
 
+    // A Power-tab timer is running: the collapsed bar shows a steady gold line (recording's red pulse wins).
+    private bool _scheduled;
+
+    public void SetScheduled(bool scheduled)
+    {
+        if (_scheduled == scheduled) return;
+        _scheduled = scheduled;
+        UpdateRecordGlow();
+    }
+
     private void UpdateRecordGlow()
     {
         if (_recording && !_expanded)
         {
+            RecordGlow.Background = new SolidColorBrush(Color.FromRgb(0xE5, 0x48, 0x4D));
             RecordGlow.BeginAnimation(OpacityProperty, new DoubleAnimation(1, 0.35, Anim.Ms(900))
             {
                 AutoReverse = true,
@@ -132,10 +143,22 @@ public partial class MainWindow : Window
                 EasingFunction = new SineEase { EasingMode = EasingMode.EaseInOut },
             });
         }
+        else if (_scheduled && !_expanded)
+        {
+            RecordGlow.Background = new SolidColorBrush(TabActive);
+            Anim.To(RecordGlow, OpacityProperty, 0.9, 300);
+        }
         else
         {
             Anim.To(RecordGlow, OpacityProperty, 0, 200);
         }
+    }
+
+    // Opens the island on the given tab (used by the Power timer's one-minute heads-up).
+    public void ShowTab(FrameworkElement page)
+    {
+        Expand();
+        Select(Array.FindIndex(_tabs, t => t.Page == page));
     }
 
     private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
@@ -380,8 +403,11 @@ public partial class MainWindow : Window
     private void Quit_Click(object sender, RoutedEventArgs e) => Quit();
 
     // Finish writing an in-progress recording before quitting, so the video isn't left corrupt.
-    public void Quit() => ControlsPage.StopRecording(then: () => Application.Current.Shutdown());
+    public void Quit() => BeforeExit(() => Application.Current.Shutdown());
 
     // Same care as Quit: a running recording is finished before Brim closes for the update.
-    public void RestartForUpdate() => ControlsPage.StopRecording(then: Updater.ApplyAndRestart);
+    public void RestartForUpdate() => BeforeExit(Updater.ApplyAndRestart);
+
+    // Runs `exit` once any recording has been written out (Quit, update restart, scheduled shutdown).
+    public void BeforeExit(Action exit) => ControlsPage.StopRecording(then: exit);
 }
