@@ -105,6 +105,26 @@ internal static class Native
     }
     [DllImport("kernel32.dll")] public static extern bool GetSystemPowerStatus(out PowerStatus status);
 
+    [DllImport("kernel32.dll")] private static extern IntPtr OpenProcess(uint access, bool inherit, int pid);
+    [DllImport("kernel32.dll")] private static extern bool CloseHandle(IntPtr handle);
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
+    private static extern bool QueryFullProcessImageName(IntPtr process, uint flags, StringBuilder name, ref int size);
+
+    // Exe path of a running process. Uses the "limited information" right, which works for most
+    // processes without admin rights (unlike Process.MainModule).
+    public static string? ProcessPath(int pid)
+    {
+        var handle = OpenProcess(0x1000 /* PROCESS_QUERY_LIMITED_INFORMATION */, false, pid);
+        if (handle == IntPtr.Zero) return null;
+        try
+        {
+            var name = new StringBuilder(1024);
+            int size = name.Capacity;
+            return QueryFullProcessImageName(handle, 0, name, ref size) ? name.ToString() : null;
+        }
+        finally { CloseHandle(handle); }
+    }
+
     // ---------- wallpaper ----------
 
     [DllImport("user32.dll", CharSet = CharSet.Unicode)]

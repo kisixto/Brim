@@ -43,6 +43,14 @@ public sealed class Settings
     public List<string> HiddenTabs { get; set; } = new();
     public bool AutoUpdate { get; set; } = true;
 
+    // Apps tab groups: group names in display order, and which group each app (by path) belongs to.
+    public List<string> AppGroups { get; set; } = new();
+    public Dictionary<string, string> AppGroupOf { get; set; } = new();
+    public string? AppsGroup { get; set; }               // selected group; null = All
+
+    public string StatsFocus { get; set; } = "cpu";      // cpu | memory: which top-apps list Stats shows
+    public int TimerMinutes { get; set; } = 5;           // Today tab timer length
+
     // Power tab timer (null when nothing is scheduled)
     public string? ScheduledPower { get; set; }          // shutdown | restart | sleep
     public DateTime? ScheduledAt { get; set; }

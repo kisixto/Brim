@@ -18,14 +18,25 @@
                         <Button Style="{StaticResource RowButton}" Click="Item_Click">
                             <Grid>
                                 <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="{Binding Preview}" FontSize="12" TextTrimming="CharacterEllipsis" />
-                                <TextBlock Grid.Column="1" Text="{Binding Time}" Foreground="{StaticResource Muted}"
+                                <!-- Image entries show a thumbnail; text entries hide it. -->
+                                <Border x:Name="ThumbFrame" CornerRadius="4" ClipToBounds="True" Margin="0,0,10,0" MaxWidth="120">
+                                    <Image Source="{Binding Thumb}" MaxHeight="48" Stretch="Uniform" />
+                                </Border>
+                                <TextBlock Grid.Column="1" Text="{Binding Preview}" FontSize="12" TextTrimming="CharacterEllipsis"
+                                           VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="2" Text="{Binding Time}" Foreground="{StaticResource Muted}"
                                            FontSize="10" Margin="10,0,0,0" VerticalAlignment="Center" />
                             </Grid>
                         </Button>
+                        <DataTemplate.Triggers>
+                            <DataTrigger Binding="{Binding Thumb}" Value="{x:Null}">
+                                <Setter TargetName="ThumbFrame" Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                        </DataTemplate.Triggers>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>

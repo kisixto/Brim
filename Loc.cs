@@ -67,7 +67,25 @@ internal static class Loc
         ["ClipHint"] = ("클릭하면 다시 복사돼요", "Click an item to copy it again"),
         ["ClipCopied"] = ("복사됨 ✓", "Copied ✓"),
         ["ClipClear"] = ("모두 지우기", "Clear all"),
-        ["ClipEmpty"] = ("복사한 텍스트가 여기에 쌓여요", "Text you copy shows up here"),
+        ["ClipEmpty"] = ("복사한 텍스트와 사진이 여기에 쌓여요", "Text and images you copy show up here"),
+        ["ClipImage"] = ("이미지 · {0}×{1}", "Image · {0}×{1}"),
+
+        ["AppsAll"] = ("전체", "All"),
+        ["AppsGroupName"] = ("그룹 이름", "Group name"),
+        ["AppsRename"] = ("이름 바꾸기", "Rename"),
+        ["AppsDeleteGroup"] = ("그룹 삭제 (앱은 남아요)", "Delete group (apps stay)"),
+        ["AppsMoveTo"] = ("그룹", "Group"),
+        ["AppsNoGroup"] = ("그룹 없음", "No group"),
+        ["AppsNewGroup"] = ("새 그룹", "New group"),
+        ["AppsGroupEmpty"] = ("비어 있어요 · 앱을 오른쪽 클릭해서 이 그룹으로 옮기거나, 끌어다 놓으세요", "Empty · right-click an app to move it here, or drop files onto Brim"),
+
+        ["TopCpu"] = ("CPU를 많이 쓰는 앱", "Top apps by CPU"),
+        ["TopMemory"] = ("메모리를 많이 쓰는 앱", "Top apps by memory"),
+        ["TopMeasuring"] = ("측정 중…", "Measuring…"),
+        ["StatsPick"] = ("CPU나 메모리 칸을 눌러 바꿀 수 있어요", "Click CPU or Memory to switch"),
+
+        ["Timer"] = ("타이머", "Timer"),
+        ["TimerDone"] = ("시간이 다 됐어요", "Time's up"),
 
         ["AppsHint"] = ("프로그램, 바로가기, 폴더를 Brim에 끌어다 놓아도 추가돼요", "Drag programs, shortcuts or folders onto Brim to add them"),
         ["AppsRemove"] = ("목록에서 빼기", "Remove"),
