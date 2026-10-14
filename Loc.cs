@@ -87,6 +87,13 @@ internal static class Loc
         ["TopMeasuring"] = ("측정 중…", "Measuring…"),
         ["StatsPick"] = ("CPU나 메모리 칸을 눌러 바꿀 수 있어요", "Click CPU or Memory to switch"),
 
+        ["WinEmpty"] = ("열린 창이 없어요", "No open windows"),
+        ["WinClose"] = ("창 닫기", "Close window"),
+        ["WinDesktop"] = ("바탕 화면", "Desktop"),
+        ["WinTaskView"] = ("작업 보기", "Task view"),
+        ["WinQuick"] = ("빠른 설정", "Quick settings"),
+        ["WinNotify"] = ("알림", "Notifications"),
+
         ["Timer"] = ("타이머", "Timer"),
         ["TimerDone"] = ("시간이 다 됐어요", "Time's up"),
 

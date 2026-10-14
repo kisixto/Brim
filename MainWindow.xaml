@@ -47,6 +47,7 @@
 
             <Grid Grid.Row="1" Margin="0,10,0,0">
                 <tabs:ControlsTab x:Name="ControlsPage" />
+                <tabs:WindowsTab x:Name="WindowsPage" />
                 <tabs:TodayTab x:Name="TodayPage" />
                 <tabs:StatsTab x:Name="StatsPage" />
                 <tabs:ClipboardTab x:Name="ClipboardPage" />

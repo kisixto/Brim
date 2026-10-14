@@ -44,7 +44,7 @@ public partial class MainWindow : Window
 
         _tabs = new (string, FrameworkElement)[]
         {
-            ("Controls", ControlsPage), ("Today", TodayPage), ("Stats", StatsPage), ("Clipboard", ClipboardPage),
+            ("Controls", ControlsPage), ("Windows", WindowsPage), ("Today", TodayPage), ("Stats", StatsPage), ("Clipboard", ClipboardPage),
             ("Apps", AppsPage), ("Wallpaper", WallpaperPage), ("Power", PowerPage), ("Options", OptionsPage),
         };
         foreach (var (name, page) in _tabs)
@@ -96,7 +96,13 @@ public partial class MainWindow : Window
         Native.AddClipboardFormatListener(hwnd);
         HwndSource.FromHwnd(hwnd)!.AddHook(WndProc);
         _hwnd = hwnd;
+
+        // Windows tells registered shell-hook windows when windows open, close, activate or flash.
+        _shellHookMessage = TaskWindows.RegisterWindowMessage("SHELLHOOK");
+        TaskWindows.RegisterShellHookWindow(hwnd);
     }
+
+    private int _shellHookMessage;
 
     // ---------- capture ----------
 
@@ -165,6 +171,8 @@ public partial class MainWindow : Window
     {
         if (msg == Native.WM_CLIPBOARDUPDATE)
             Dispatcher.BeginInvoke(ClipboardPage.Capture);
+        else if (msg == _shellHookMessage && msg != 0)
+            WindowsPage.OnShellEvent(wParam.ToInt32(), lParam);
         return IntPtr.Zero;
     }
 

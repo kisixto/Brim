@@ -21,11 +21,11 @@
             <Setter Property="FontSize" Value="11" />
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="Cursor" Value="Hand" />
-            <Setter Property="Margin" Value="1,0" />
+            <Setter Property="Margin" Value="0" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="RadioButton">
-                        <Border Background="Transparent" Padding="10,3">
+                        <Border Background="Transparent" Padding="8,3">
                             <ContentPresenter />
                         </Border>
                     </ControlTemplate>

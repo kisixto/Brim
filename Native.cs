@@ -44,7 +44,8 @@ internal static class Native
     [DllImport("user32.dll")] public static extern bool SetWindowDisplayAffinity(IntPtr hwnd, uint affinity);
 
     // Presses a key combination (all down in order, then up in reverse), e.g. Win+Shift+S.
-    public const ushort VK_LWIN = 0x5B, VK_SHIFT = 0x10, VK_SNAPSHOT = 0x2C, VK_S = 0x53;
+    public const ushort VK_LWIN = 0x5B, VK_SHIFT = 0x10, VK_SNAPSHOT = 0x2C, VK_S = 0x53,
+                        VK_TAB = 0x09, VK_A = 0x41, VK_D = 0x44, VK_N = 0x4E;
 
     [StructLayout(LayoutKind.Explicit, Size = 40)]
     private struct KeyInput
