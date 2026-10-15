@@ -149,14 +149,14 @@ internal static class TaskWindows
     [DllImport("user32.dll")] private static extern bool GetWindowRect(IntPtr hwnd, out Rect rect);
     [DllImport("user32.dll")] private static extern IntPtr MonitorFromWindow(IntPtr hwnd, uint flags);
     [DllImport("user32.dll")] private static extern bool GetMonitorInfo(IntPtr monitor, ref MonitorInfo info);
-    [DllImport("user32.dll")] private static extern bool IsZoomed(IntPtr hwnd);
     [DllImport("user32.dll", CharSet = CharSet.Unicode)] private static extern int GetClassName(IntPtr hwnd, StringBuilder name, int max);
 
     private static readonly HashSet<string> ShellClasses = new() { "Progman", "WorkerW", "Shell_TrayWnd", "Shell_SecondaryTrayWnd" };
 
     // True when the window in front covers the whole monitor Brim is on: a full-screen or borderless
-    // game, a video in full screen, a slideshow... A plain maximized window (it has a title bar) doesn't
-    // count, even when an auto-hiding taskbar lets it reach the screen edges.
+    // game, a video in full screen, a slideshow... A window with a title bar never counts, however big:
+    // maximized, stretched past the screen edges, or a windowed game as large as the screen.
+    // (Browsers drop the title bar when a video goes full screen, so those still count.)
     public static bool FullscreenOverMonitorOf(IntPtr own)
     {
         var front = GetForegroundWindow();
@@ -173,7 +173,7 @@ internal static class TaskWindows
         if (monitor != MonitorFromWindow(own, MONITOR_DEFAULTTONEAREST)) return false; // full screen on another monitor
 
         const long WS_CAPTION = 0x00C00000;
-        if (IsZoomed(front) && (GetWindowLongPtr(front, -16 /* GWL_STYLE */).ToInt64() & WS_CAPTION) == WS_CAPTION) return false;
+        if ((GetWindowLongPtr(front, -16 /* GWL_STYLE */).ToInt64() & WS_CAPTION) == WS_CAPTION) return false;
 
         var info = new MonitorInfo { Size = Marshal.SizeOf<MonitorInfo>() };
         if (!GetMonitorInfo(monitor, ref info) || !GetWindowRect(front, out var r)) return false;
