@@ -118,6 +118,7 @@ internal static class Loc
         ["OptNormal"] = ("보통", "Normal"),
         ["OptSlow"] = ("천천히", "Slowly"),
         ["OptReduceMotion"] = ("애니메이션 줄이기", "Reduce motion"),
+        ["OptHideFullscreen"] = ("전체 화면 앱에서 숨기기", "Hide over full-screen apps"),
         ["OptClock"] = ("시계", "Clock"),
         ["Opt24h"] = ("24시간제", "24-hour clock"),
         ["OptCapture"] = ("캡처", "Capture"),

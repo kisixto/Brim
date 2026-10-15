@@ -39,6 +39,7 @@ public partial class OptionsTab : UserControl
         Choice(behavior, "OptOpenSpeed", () => S.OpenSpeed, v => { S.OpenSpeed = v; Host?.ApplyOpenSpeed(); },
             ("fast", "OptFast", null), ("normal", "OptNormal", null), ("slow", "OptSlow", null));
         Toggle(behavior, "OptReduceMotion", () => S.ReduceMotion, v => S.ReduceMotion = v);
+        Toggle(behavior, "OptHideFullscreen", () => S.HideInFullscreen, v => { S.HideInFullscreen = v; Host?.UpdateFullscreenHiding(); });
 
         var clock = Section("OptClock");
         Toggle(clock, "Opt24h", () => S.Clock24h, v => S.Clock24h = v);

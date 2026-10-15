@@ -142,6 +142,44 @@ internal static class TaskWindows
 
     public static void Minimize(IntPtr hwnd) => ShowWindow(hwnd, SW_MINIMIZE);
 
+    // ---------- full-screen detection ----------
+
+    [StructLayout(LayoutKind.Sequential)] private struct Rect { public int Left, Top, Right, Bottom; }
+    [StructLayout(LayoutKind.Sequential)] private struct MonitorInfo { public int Size; public Rect Monitor, Work; public uint Flags; }
+    [DllImport("user32.dll")] private static extern bool GetWindowRect(IntPtr hwnd, out Rect rect);
+    [DllImport("user32.dll")] private static extern IntPtr MonitorFromWindow(IntPtr hwnd, uint flags);
+    [DllImport("user32.dll")] private static extern bool GetMonitorInfo(IntPtr monitor, ref MonitorInfo info);
+    [DllImport("user32.dll")] private static extern bool IsZoomed(IntPtr hwnd);
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)] private static extern int GetClassName(IntPtr hwnd, StringBuilder name, int max);
+
+    private static readonly HashSet<string> ShellClasses = new() { "Progman", "WorkerW", "Shell_TrayWnd", "Shell_SecondaryTrayWnd" };
+
+    // True when the window in front covers the whole monitor Brim is on: a full-screen or borderless
+    // game, a video in full screen, a slideshow... A plain maximized window (it has a title bar) doesn't
+    // count, even when an auto-hiding taskbar lets it reach the screen edges.
+    public static bool FullscreenOverMonitorOf(IntPtr own)
+    {
+        var front = GetForegroundWindow();
+        if (front == IntPtr.Zero || front == own) return false;
+        GetWindowThreadProcessId(front, out int pid);
+        if (pid == Environment.ProcessId) return false; // Brim's own menus and dialogs
+
+        var cls = new StringBuilder(64);
+        GetClassName(front, cls, cls.Capacity);
+        if (ShellClasses.Contains(cls.ToString())) return false; // the desktop and taskbar
+
+        const uint MONITOR_DEFAULTTONEAREST = 2;
+        var monitor = MonitorFromWindow(front, MONITOR_DEFAULTTONEAREST);
+        if (monitor != MonitorFromWindow(own, MONITOR_DEFAULTTONEAREST)) return false; // full screen on another monitor
+
+        const long WS_CAPTION = 0x00C00000;
+        if (IsZoomed(front) && (GetWindowLongPtr(front, -16 /* GWL_STYLE */).ToInt64() & WS_CAPTION) == WS_CAPTION) return false;
+
+        var info = new MonitorInfo { Size = Marshal.SizeOf<MonitorInfo>() };
+        if (!GetMonitorInfo(monitor, ref info) || !GetWindowRect(front, out var r)) return false;
+        return r.Left <= info.Monitor.Left && r.Top <= info.Monitor.Top && r.Right >= info.Monitor.Right && r.Bottom >= info.Monitor.Bottom;
+    }
+
     // Asks the window to close, exactly like its X button (apps can still ask to save).
     public static void Close(IntPtr hwnd) => PostMessage(hwnd, WM_CLOSE, IntPtr.Zero, IntPtr.Zero);
 }

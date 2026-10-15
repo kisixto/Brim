@@ -37,6 +37,7 @@ public sealed class Settings
     public string Language { get; set; } = "auto";       // auto | ko | en
     public string OpenSpeed { get; set; } = "normal";    // fast | normal | slow
     public bool ReduceMotion { get; set; }
+    public bool HideInFullscreen { get; set; } = true;     // hide over full-screen / borderless apps
     public bool Clock24h { get; set; } = true;
     public bool RecordAudio { get; set; } = true;
     public bool HideFromOwnCaptures { get; set; } = true;

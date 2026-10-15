@@ -80,6 +80,8 @@ public partial class MainWindow : Window
         {
             PlaceAtTop();
             Updater.Start();
+            _fullscreenCheck.Tick += (_, _) => UpdateFullscreenHiding();
+            _fullscreenCheck.Start();
         };
         SystemParameters.StaticPropertyChanged += (_, e) =>
         {
@@ -163,8 +165,34 @@ public partial class MainWindow : Window
     // Opens the island on the given tab (used by the Power timer's one-minute heads-up).
     public void ShowTab(FrameworkElement page)
     {
+        // Alerts (shutdown heads-up, timer done) must be seen, so they show even over a full-screen game.
+        _alerting = true;
+        UpdateFullscreenHiding();
         Expand();
         Select(Array.FindIndex(_tabs, t => t.Page == page));
+    }
+
+    // ---------- hiding over full-screen apps ----------
+
+    // Checked twice a second as well as on window switches, because a window can go full screen
+    // without changing which window is in front (e.g. a video in the browser).
+    private readonly DispatcherTimer _fullscreenCheck = new() { Interval = TimeSpan.FromMilliseconds(500) };
+    private bool _hiddenForFullscreen, _alerting;
+
+    public void UpdateFullscreenHiding()
+    {
+        bool hide = Settings.Current.HideInFullscreen && !_alerting && TaskWindows.FullscreenOverMonitorOf(_hwnd);
+        if (hide == _hiddenForFullscreen) return;
+        _hiddenForFullscreen = hide;
+        if (hide)
+        {
+            _expandTimer.Stop();
+            Collapse();
+        }
+        // Fully transparent and not hit-testable: invisible, and the mouse passes straight through,
+        // so pushing the cursor against the top edge (e.g. to pan a game camera) can't open it.
+        Body.IsHitTestVisible = !hide;
+        Anim.To(Body, OpacityProperty, hide ? 0 : 1, 200);
     }
 
     private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
@@ -172,7 +200,10 @@ public partial class MainWindow : Window
         if (msg == Native.WM_CLIPBOARDUPDATE)
             Dispatcher.BeginInvoke(ClipboardPage.Capture);
         else if (msg == _shellHookMessage && msg != 0)
+        {
             WindowsPage.OnShellEvent(wParam.ToInt32(), lParam);
+            Dispatcher.BeginInvoke(UpdateFullscreenHiding); // react to window switches right away
+        }
         return IntPtr.Zero;
     }
 
@@ -377,6 +408,13 @@ public partial class MainWindow : Window
         Anim.To(Body, WidthProperty, CollapsedWidth, 420, Anim.OutQuart, 50);
         Anim.To(Body, HeightProperty, CollapsedHeight, 380, Anim.OutQuart, 50);
         Anim.To(this, RadiusProperty, CollapsedRadius, 380, Anim.OutQuart, 50);
+
+        // An alert that popped up over a full-screen app is done; hide again if still full screen.
+        if (_alerting)
+        {
+            _alerting = false;
+            UpdateFullscreenHiding();
+        }
     }
 
     private void UpdateShape()
