@@ -349,7 +349,8 @@ public partial class MainWindow : Window
     // Check the real cursor against the island's final footprint instead.
     private bool CursorInsideExpandedArea()
     {
-        if (!Native.GetCursorPos(out var screen)) return false;
+        // While Windows shuts down the window is torn down first and then told it lost focus.
+        if (PresentationSource.FromVisual(this) == null || !Native.GetCursorPos(out var screen)) return false;
         var p = PointFromScreen(new Point(screen.X, screen.Y));
         var area = new Rect((ActualWidth - ExpandedWidth) / 2, 0, ExpandedWidth, ExpandedHeight);
         return area.Contains(p);
